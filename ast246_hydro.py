@@ -509,16 +509,16 @@ if __name__ == '__main__':
     """
 
     # Do the time integration with the finite volume scheme
-    advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
-    advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
+    # advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
+    # advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
     #    advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
 
     # Combine the different solutions into one array
     F1 = np.zeros((Nx, n_steps, 4))
     F1[:, :, 0] = f_ini_plt
     F1[:, :, 1] = advection_FD
-    F1[:, :, 2] = advection_MUSCL1
-    F1[:, :, 3] = advection_MUSCL2
+    # F1[:, :, 2] = advection_MUSCL1
+    # F1[:, :, 3] = advection_MUSCL2
     #    F1[:,:,4] = advection_MUSCL3
 
     """
