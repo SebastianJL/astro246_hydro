@@ -388,7 +388,7 @@ def animate_results(F, fps, task, *args):
             raise Exception("Wrong task number for the given Array!")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        fig.canvas.set_window_title("AST246: Hydro project - First Task (Advection equation)")
+        fig.canvas.manager.set_window_title("AST246: Hydro project - First Task (Advection equation)")
         line1, = ax.plot([], [], 'k--', label='Original function')
         line2, = ax.plot([], [], 'r-', label='Finite differencing (Forward Euler)')
         #        line3, = ax.plot([], [], 'b-', label='Finite volume (MUSCL) with minmod')
@@ -404,7 +404,7 @@ def animate_results(F, fps, task, *args):
             raise Exception("Wrong task number for the given Array!")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        fig.canvas.set_window_title("AST246: Hydro project - Second Task (Diffusion equation)")
+        fig.canvas.manager.set_window_title("AST246: Hydro project - Second Task (Diffusion equation)")
         line1, = ax.plot([], [], 'k--', label='Original function')
         lines = [line1]
         for val in args[0]:
@@ -416,7 +416,7 @@ def animate_results(F, fps, task, *args):
             raise Exception("Wrong task number for the given Array!")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        fig.canvas.set_window_title("AST246: Hydro project - Third Task (Advection-Diffusion equation)")
+        fig.canvas.manager.set_window_title("AST246: Hydro project - Third Task (Advection-Diffusion equation)")
         line1, = ax.plot([], [], 'k--', label='Original function')
         lines = [line1]
         for (d, dt) in zip(args[0], args[1]):
@@ -430,7 +430,7 @@ def animate_results(F, fps, task, *args):
     elif task == 4:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        fig.canvas.set_window_title("AST246: Hydro project - Second Task (Diffusion equation)")
+        fig.canvas.manager.set_window_title("AST246: Hydro project - Second Task (Diffusion equation)")
         line1, = ax.plot([], [], 'k--', label='Original function')
         line2, = ax.plot([], [], 'r-', label='Advection FD (Forward Euler)')
         line3, = ax.plot([], [], 'b-', label='Diffusion FD (RK2)')
