@@ -375,7 +375,6 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
     ani : animation reference
     """
 
-
     if task == 1:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
@@ -384,6 +383,7 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
         line2, = ax.plot([], [], 'r-', label='Finite differencing (Forward Euler)')
         line3, = ax.plot([], [], 'b-', label='Finite volume (MUSCL) with minmod')
         line4, = ax.plot([], [], 'g-', label='Finite volume (MUSCL) with superbee')
+        # line5, = ax.plot([], [], 'o-', label='Finite volume (MUSCL) with van leer')
         lines = [line1, line2, line3, line4]
     elif task == 2:
         fig = plt.figure()
@@ -457,7 +457,7 @@ if __name__ == '__main__':
     global n_steps
     global f_ini
 
-    Nx = 500  # number of points / cells. Must be integer multiple of Nx_start.
+    Nx = 100  # number of points / cells. Must be integer multiple of Nx_start.
     Nx_start = 100
     step = Nx//Nx_start  # Step size for plot, such that animations stay the same speed, regardless of Nx.
     xmin, xmax = 0, 1
@@ -476,6 +476,7 @@ if __name__ == '__main__':
 
     # Choosing  the slope limiters for comparison
     sl = ["minmod", "superbee", "van_leer"]
+    # van_leer seems to be broken.
 
     # Just for the plotting section ...
     f_ini_plt = np.tile(f_ini, [n_steps, 1]).T
@@ -502,16 +503,16 @@ if __name__ == '__main__':
         advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
     with Timed(f'1D advection MUSCL {sl[1]}'):
         advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
-    with Timed(f'1D advection MUSCL {sl[2]}'):
-        advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
+    # with Timed(f'1D advection MUSCL {sl[2]}'):
+    #     advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
+
 
     # Combine the different solutions into one array
     F1 = np.zeros((Nx, n_steps//step, 4))
     F1[:, :, 0] = f_ini_plt[:, ::step]
     F1[:, :, 1] = advection_FD[:, ::step]
     F1[:, :, 2] = advection_MUSCL1[:, ::step]
-    F1[:, :, 3] = advection_MUSCL2[:, ::step]
-    # F1[:, :, 4] = advection_MUSCL3[:, ::step]
+    # F1[:, :, 3] = advection_MUSCL2[:, ::step]
 
     """
     Task 2: solving the 1D second order diffusion equation df/dt = D d^2 f / dx^2
