@@ -369,10 +369,10 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
         fig.canvas.manager.set_window_title("AST246: Hydro project - First Task (Advection equation)")
         line1, = ax.plot([], [], 'k--', label='Original function')
         line2, = ax.plot([], [], 'r-', label='Finite differencing (Forward Euler)')
-        #        line3, = ax.plot([], [], 'b-', label='Finite volume (MUSCL) with minmod')
+        line3, = ax.plot([], [], 'b-', label='Finite volume (MUSCL) with minmod')
         #        line4, = ax.plot([], [], 'g-', label='Finite volume (MUSCL) with superbee')
         #        lines = [line1, line2, line3, line4]
-        lines = [line1, line2]
+        lines = [line1, line2, line3]
     #        for slope_type in args[2]:
     #            label_str = "Finite volume (MUSCL) with "+slope_type
     #            line, = ax.plot([], [], linestyle='-.', label=label_str)
@@ -492,7 +492,7 @@ if __name__ == '__main__':
     """
 
     # Do the time integration with the finite volume scheme
-    # advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
+    advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
     # advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
     #    advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
 
@@ -500,7 +500,7 @@ if __name__ == '__main__':
     F1 = np.zeros((Nx, n_steps//step, 4))
     F1[:, :, 0] = f_ini_plt[:, ::step]
     F1[:, :, 1] = advection_FD[:, ::step]
-    # F1[:, :, 2] = advection_MUSCL1
+    F1[:, :, 2] = advection_MUSCL1[:, ::step]
     # F1[:, :, 3] = advection_MUSCL2
     #    F1[:,:,4] = advection_MUSCL3
 
