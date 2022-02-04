@@ -420,10 +420,10 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
     else:
         raise Exception("Unknown task number! Choose either 1, 2 or 3.")
 
-    miny = np.amin(F_task)
-    maxy = np.amax(F_task)
+    y_min = np.amin(F_task)
+    y_max = np.amax(F_task)
 
-    ax.set_ylim([miny - abs(maxy - miny)/2, 1.2*maxy])
+    ax.set_ylim([y_min - abs(y_max - y_min)/2, 1.2*y_max])
     ax.set_xlim(xmin, xmax)
     ax.set_xlabel('x')
     ax.set_ylabel('f(x)')
@@ -457,7 +457,7 @@ if __name__ == '__main__':
     global n_steps
     global f_ini
 
-    Nx = 100  # number of points / cells. Must be integer multiple of Nx_start.
+    Nx = 200  # number of points / cells. Must be integer multiple of Nx_start.
     Nx_start = 100
     step = Nx//Nx_start  # Step size for plot, such that animations stay the same speed, regardless of Nx.
     xmin, xmax = 0, 1
@@ -470,8 +470,8 @@ if __name__ == '__main__':
     n_steps = step*500  # number of integration time steps
 
     # Defining the initial shape
-    f_ini = step_function(x)
-    # f_ini = gaussian(x)
+    # f_ini = step_function(x)
+    f_ini = gaussian(x)
     # f_ini = trigonometric(x, 0.1)
 
     # Choosing  the slope limiters for comparison
