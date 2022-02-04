@@ -38,15 +38,9 @@ def advection_1D_FD(f, V0, dt, t, h):
     ======
     f_next : array containing the updated shape
     """
-
-    rhs = np.zeros(f.shape)
-    for i in range(f.shape[0]):
-        rhs[i] = -V0*(f[i] - f[i - 1])/h
-    #    rhs[1:] = -V0*(f[1:]-f[:-1])/h
-    #    rhs[0] = f[-1]
-
-    f_next = f + dt*rhs
-    #    f_next[0] = f_next[-1]
+    f_next = np.zeros(f.shape)
+    f_next[1:] = f[1:] - dt*V0*(f[1:] - f[:-1])/h
+    f_next[0] = f_next[-1]  # Periodic boundary.
 
     return f_next
 
