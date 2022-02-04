@@ -113,7 +113,7 @@ def advection_1D_MUSCL(f, V0, dt, t, h, slope_type):
     dt : float (time interval)
     t : current time
     h : float (cell size)
-    slope_type : str (type of the slope limiter to use: minmod, superbee)
+    slope_type : str (type of the slope limiter to use: minmod, superbee, van_leer)
 
     OUTPUT
     ======
@@ -159,7 +159,7 @@ def advection_1D_MUSCL(f, V0, dt, t, h, slope_type):
     return f_next
 
 
-def advection_1D_integration(n_steps, f, V0, h, dt, int_type, *args):
+def advection_1D_integration(n_steps, f, V0, h, dt, int_type, slope_type="minmod"):
     """
     Performs the time integration of the 1D advection equation for a given
     initial shape, velocity, cell size and time step using a given type
@@ -173,6 +173,7 @@ def advection_1D_integration(n_steps, f, V0, h, dt, int_type, *args):
     h : float (cell size)
     dt : float (time step)
     int_type : str (integration type, either "FD" or "MUSCL")
+    slope_type: str (only applies of `int_type`=="MUSCL". See `advection_1D_MUSCL` for details.)
 
     OUTPUT
     ======
@@ -192,7 +193,6 @@ def advection_1D_integration(n_steps, f, V0, h, dt, int_type, *args):
             result[:, i] = temp_res
             f = temp_res
     elif int_type == "MUSCL":
-        slope_type = args[0]
         for i in range(1, n_steps):
             t += dt
             temp_res = advection_1D_MUSCL(f, V0, dt, t, h, slope_type)
