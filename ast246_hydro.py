@@ -512,7 +512,7 @@ if __name__ == '__main__':
     F1[:, :, 0] = f_ini_plt[:, ::step]
     F1[:, :, 1] = advection_FD[:, ::step]
     F1[:, :, 2] = advection_MUSCL1[:, ::step]
-    # F1[:, :, 3] = advection_MUSCL2[:, ::step]
+    F1[:, :, 3] = advection_MUSCL2[:, ::step]
 
     """
     Task 2: solving the 1D second order diffusion equation df/dt = D d^2 f / dx^2
