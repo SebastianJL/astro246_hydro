@@ -16,8 +16,8 @@ This file is used to ...
    in the HS2019 using the operator splitting technique (Task 3)
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib import animation
 
 
@@ -487,8 +487,8 @@ if __name__ == '__main__':
 
     # Defining the initial shape
     f_ini = step_function(x)
-    #    f_ini = gaussian(x)
-    #    f_ini = trigonometric(x, 0.1)
+    # f_ini = gaussian(x)
+    # f_ini = trigonometric(x, 0.1)
 
     # Choosing  the slope limiters for comparison
     sl = ["minmod", "superbee"]
@@ -530,14 +530,14 @@ if __name__ == '__main__':
             using the finite difference method
     """
 
-    D = np.array([1e-3, 5e-2, 5e-1, 1])
-    dt_diff = np.zeros(D.shape[0])
-    dt_diff[:] = 0.5*h**2/(2*np.amax(D))
-
-    F2 = np.zeros((Nx, n_steps, 1 + D.shape[0]))
-    F2[:, :, 0] = f_ini_plt
-    for i in range(D.shape[0]):
-        F2[:, :, i + 1] = diffusion_1D_integration(n_steps, f_ini, D[i], h, dt_diff[i], "FD")
+    # D = np.array([1e-3, 5e-2, 5e-1, 1])
+    # dt_diff = np.zeros(D.shape[0])
+    # dt_diff[:] = 0.5*h**2/(2*np.amax(D))
+    #
+    # F2 = np.zeros((Nx, n_steps, 1 + D.shape[0]))
+    # F2[:, :, 0] = f_ini_plt
+    # for i in range(D.shape[0]):
+    #     F2[:, :, i + 1] = diffusion_1D_integration(n_steps, f_ini, D[i], h, dt_diff[i], "FD")
 
     """
     Task 3: solving the 1D second order advection-diffusion equation
@@ -545,27 +545,27 @@ if __name__ == '__main__':
             using the operator splitting technique
     """
 
-    D_advec_diff = [0.01]
-    dt_advec_diff = [0.5*h**2/(2*D_advec_diff[0])]
-    #    dt_advec_diff = [dt_advec]
-
-    #    print(n_steps*dt_advec_diff[0], dt_advec_diff[0])
-    #    print(n_steps*dt_advec_diff2[0], dt_advec_diff2[0])
-
-    F3 = np.zeros((Nx, n_steps, 3))
-
-    F3[:, :, 0] = f_ini_plt
-
-    j = 1
-    for (d, dt) in zip(D_advec_diff, dt_advec_diff):
-        for slope_type in sl:
-            F3[:, :, j] = diffusion_1D_integration(n_steps, f_ini, d, h, dt, "OS", slope_type)
-            j += 1
-
-    #    F3[:,:,1] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[0], h, dt_advec_diff[0], "OS", sl[0])
-    #    F3[:,:,2] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[0], h, dt_advec_diff[0], "OS", sl[1])
-    #    F3[:,:,3] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[1], h, dt_advec_diff[1], "OS", sl[0])
-    #    F3[:,:,4] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[1], h, dt_advec_diff[1], "OS", sl[1])
+    # D_advec_diff = [0.01]
+    # dt_advec_diff = [0.5*h**2/(2*D_advec_diff[0])]
+    # #    dt_advec_diff = [dt_advec]
+    #
+    # #    print(n_steps*dt_advec_diff[0], dt_advec_diff[0])
+    # #    print(n_steps*dt_advec_diff2[0], dt_advec_diff2[0])
+    #
+    # F3 = np.zeros((Nx, n_steps, 3))
+    #
+    # F3[:, :, 0] = f_ini_plt
+    #
+    # j = 1
+    # for (d, dt) in zip(D_advec_diff, dt_advec_diff):
+    #     for slope_type in sl:
+    #         F3[:, :, j] = diffusion_1D_integration(n_steps, f_ini, d, h, dt, "OS", slope_type)
+    #         j += 1
+    #
+    # #    F3[:,:,1] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[0], h, dt_advec_diff[0], "OS", sl[0])
+    # #    F3[:,:,2] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[0], h, dt_advec_diff[0], "OS", sl[1])
+    # #    F3[:,:,3] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[1], h, dt_advec_diff[1], "OS", sl[0])
+    # #    F3[:,:,4] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[1], h, dt_advec_diff[1], "OS", sl[1])
 
     """
     Calculate the equivalent diffusion coefficient D for the advection equation
@@ -582,9 +582,9 @@ if __name__ == '__main__':
     """
     Plotting the desired results results & saving to a file
     """
-
-    outer_ani = animate_results(F3, fps, 3, D_advec_diff, dt_advec_diff, sl)
+    task = 1
+    outer_ani = animate_results(F1, fps, task)
 
     Writer = animation.writers['ffmpeg']
     writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1000)
-#    outer_ani.save('hydro_task3_step_Nx100_n500_lowD.mp4', writer, dpi=300)
+    outer_ani.save(f'output/hydro_task{task}_step_Nx{Nx}_n500_lowD.mp4', writer, dpi=300)
