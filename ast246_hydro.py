@@ -359,15 +359,16 @@ def trigonometric(x, offset):
     return f
 
 
-def animate_results(F_task, fps, task, xmin, xmax, *args):
+def animate_results(F_task, task, fps, frames, xmin, xmax, *args):
     """
     Animation and plotting of certain tasks
 
     INPUT
     =====
     F_task : 3D array containing the results
-    fps : int
     task : int (1, 2 or 3)
+    fps : int
+    frames: Number of frames in the animation.
     args : contains additional arguments, namely args = [D, slope_limiters]
 
     OUTPUT
@@ -427,7 +428,7 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
     ax.set_xlim(xmin, xmax)
     ax.set_xlabel('x')
     ax.set_ylabel('f(x)')
-    timer = ax.set_title(f"Step: 0/{n_steps}")
+    timer = ax.set_title(f"Step: 0/{frames}")
     ax.legend(loc='best')
 
     def init():
@@ -436,7 +437,7 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
         return lines
 
     def update(i):
-        time_str = f"Step: {i}/{n_steps}"
+        time_str = f"Step: {i}/{frames}"
 
         for lnum, line in enumerate(lines):
             line.set_data(x, F_task[:, i, lnum])
@@ -444,7 +445,7 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
         timer.set_text(time_str)
         return tuple(lines)
 
-    ani = animation.FuncAnimation(fig, update, init_func=init, frames=n_steps, interval=1000/fps)
+    ani = animation.FuncAnimation(fig, update, init_func=init, frames=frames, interval=1000/fps)
 
     return ani
 
@@ -505,7 +506,6 @@ if __name__ == '__main__':
         advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
     # with Timed(f'1D advection MUSCL {sl[2]}'):
     #     advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
-
 
     # Combine the different solutions into one array
     F1 = np.zeros((Nx, n_steps//step, 4))
@@ -572,7 +572,7 @@ if __name__ == '__main__':
     Plotting the desired results results & saving to a file
     """
     task = 1
-    outer_ani = animate_results(F1, fps, task, xmin, xmax)
+    outer_ani = animate_results(F1, task, fps, n_steps//step, xmin, xmax)
     plt.show()
 
     # Writer = animation.writers['ffmpeg']
