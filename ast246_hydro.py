@@ -341,14 +341,8 @@ def trigonometric(x, offset):
     f : array
     """
 
-    f = np.zeros(x.shape)
-
-    for i in range(x.shape[0]):
-        if x[i] < offset:
-            f[i] = 0
-        else:
-            f[i] = (1/8)*np.sin(10*np.pi*(x[i] - offset))/((x[i] - offset) + 0.001)
-
+    f = (1/8)*np.sin(10*np.pi*(x - offset))/((x - offset) + 0.001)
+    f[x < offset] = 0
     return f
 
 
