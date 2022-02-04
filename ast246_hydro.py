@@ -368,7 +368,6 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
     ani : animation reference
     """
 
-    time_str = "Step: " + str(0) + "/" + str(n_steps)
 
     if task == 1:
         fig = plt.figure()
@@ -426,7 +425,7 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
     ax.set_xlim(xmin, xmax)
     ax.set_xlabel('x')
     ax.set_ylabel('f(x)')
-    timer = ax.set_title(time_str)
+    timer = ax.set_title(f"Step: 0/{n_steps}")
     ax.legend(loc='best')
 
     def init():
@@ -456,7 +455,9 @@ if __name__ == '__main__':
     global n_steps
     global f_ini
 
-    Nx = 100  # number of points / cells
+    Nx = 500  # number of points / cells. Must be integer multiple of Nx_start.
+    Nx_start = 100
+    step = Nx//Nx_start  # Step size for plot, such that animations stay the same speed, regardless of Nx.
     xmin, xmax = 0, 1
     x, h = np.linspace(xmin, xmax, Nx, retstep=True)
 
@@ -464,7 +465,7 @@ if __name__ == '__main__':
     cfl = h/V0  # cfl timestep condition
     dt_advec = 0.5*cfl  # time step for the integration
 
-    n_steps = 500  # number of integration time steps
+    n_steps = step*500  # number of integration time steps
 
     # Defining the initial shape
     f_ini = step_function(x)
@@ -478,7 +479,7 @@ if __name__ == '__main__':
     f_ini_plt = np.tile(f_ini, [n_steps, 1]).T
 
     # Defining the number of fps for the animation at the end
-    fps = 60
+    fps = 30
 
     """
     Task 1: Step 0 -> solving the 1D first order advection equation df/dt = -V0 df/dx
@@ -502,9 +503,9 @@ if __name__ == '__main__':
     #    advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
 
     # Combine the different solutions into one array
-    F1 = np.zeros((Nx, n_steps, 4))
-    F1[:, :, 0] = f_ini_plt
-    F1[:, :, 1] = advection_FD
+    F1 = np.zeros((Nx, n_steps//step, 4))
+    F1[:, :, 0] = f_ini_plt[:, ::step]
+    F1[:, :, 1] = advection_FD[:, ::step]
     # F1[:, :, 2] = advection_MUSCL1
     # F1[:, :, 3] = advection_MUSCL2
     #    F1[:,:,4] = advection_MUSCL3
@@ -571,5 +572,5 @@ if __name__ == '__main__':
     plt.show()
 
     # Writer = animation.writers['ffmpeg']
-    # writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1000)
-    # outer_ani.save(f'output/hydro_task{task}_step_Nx{Nx}_n500_lowD.mp4', writer, dpi=300)
+    # writer = Writer(fps=fps, metadata=dict(artist='Me'), bitrate=1000)
+    # outer_ani.save(f'output/hydro_task{task}_step_Nx{Nx}_FD.mp4', writer, dpi=300)
