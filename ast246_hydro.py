@@ -365,13 +365,13 @@ def trigonometric(x, offset):
     return f
 
 
-def animate_results(F, fps, task, *args):
+def animate_results(F_task, fps, task, xmin, xmax, *args):
     """
     Animation and plotting of certain tasks
 
     INPUT
     =====
-    F : 3D array containing the results
+    F_task : 3D array containing the results
     fps : int
     task : int (1, 2 or 3)
     args : contains additional arguments, namely args = [D, slope_limiters]
@@ -380,9 +380,6 @@ def animate_results(F, fps, task, *args):
     ======
     ani : animation reference
     """
-
-    global F_task
-    F_task = F
 
     time_str = "Step: " + str(0) + "/" + str(n_steps)
 
@@ -439,6 +436,7 @@ def animate_results(F, fps, task, *args):
     maxy = np.amax(F_task)
 
     ax.set_ylim([miny - abs(maxy - miny)/2, 1.2*maxy])
+    ax.set_xlim(xmin, xmax)
     ax.set_xlabel('x')
     ax.set_ylabel('f(x)')
     timer = ax.set_title(time_str)
@@ -450,7 +448,7 @@ def animate_results(F, fps, task, *args):
         return lines
 
     def update(i):
-        time_str = "Step: " + str(i) + "/" + str(n_steps)
+        time_str = f"Step: {i}/{n_steps}"
 
         for lnum, line in enumerate(lines):
             line.set_data(x, F_task[:, i, lnum])
@@ -472,7 +470,8 @@ if __name__ == '__main__':
     global f_ini
 
     Nx = 100  # number of points / cells
-    x, h = np.linspace(0, 1, Nx, retstep=True)
+    xmin, xmax = 0, 1
+    x, h = np.linspace(xmin, xmax, Nx, retstep=True)
 
     V0 = 1  # advection velocity
     cfl = h/V0  # cfl timestep condition
@@ -581,7 +580,7 @@ if __name__ == '__main__':
     Plotting the desired results results & saving to a file
     """
     task = 1
-    outer_ani = animate_results(F1, fps, task)
+    outer_ani = animate_results(F1, fps, task, xmin, xmax)
     plt.show()
 
     # Writer = animation.writers['ffmpeg']
