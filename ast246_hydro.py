@@ -460,8 +460,6 @@ def animate_results(F, fps, task, *args):
 
     ani = animation.FuncAnimation(fig, update, init_func=init, frames=n_steps, interval=1000/fps)
 
-    #    plt.show()
-
     return ani
 
 
@@ -584,7 +582,8 @@ if __name__ == '__main__':
     """
     task = 1
     outer_ani = animate_results(F1, fps, task)
+    plt.show()
 
-    Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1000)
-    outer_ani.save(f'output/hydro_task{task}_step_Nx{Nx}_n500_lowD.mp4', writer, dpi=300)
+    # Writer = animation.writers['ffmpeg']
+    # writer = Writer(fps=30, metadata=dict(artist='Me'), bitrate=1000)
+    # outer_ani.save(f'output/hydro_task{task}_step_Nx{Nx}_n500_lowD.mp4', writer, dpi=300)
