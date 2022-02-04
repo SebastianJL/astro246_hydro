@@ -22,6 +22,19 @@ import numpy as np
 from matplotlib import animation
 
 
+class Timed(object):
+    """Context manager for printing runtime of enclosed code."""
+    def __init__(self, msg):
+        self.msg = msg
+        self._start = time.perf_counter()
+
+    def __enter__(self):
+        return None
+
+    def __exit__(self, type, value, traceback):
+        print(f'{self.msg}: {time.perf_counter() - self._start: g}s')
+
+
 def advection_1D_FD(f, V0, dt, t, h):
     """
     Advection equation using finite differencing method (forward Euler).
@@ -370,13 +383,8 @@ def animate_results(F_task, fps, task, xmin, xmax, *args):
         line1, = ax.plot([], [], 'k--', label='Original function')
         line2, = ax.plot([], [], 'r-', label='Finite differencing (Forward Euler)')
         line3, = ax.plot([], [], 'b-', label='Finite volume (MUSCL) with minmod')
-        #        line4, = ax.plot([], [], 'g-', label='Finite volume (MUSCL) with superbee')
-        #        lines = [line1, line2, line3, line4]
-        lines = [line1, line2, line3]
-    #        for slope_type in args[2]:
-    #            label_str = "Finite volume (MUSCL) with "+slope_type
-    #            line, = ax.plot([], [], linestyle='-.', label=label_str)
-    #            lines.append(line)
+        line4, = ax.plot([], [], 'g-', label='Finite volume (MUSCL) with superbee')
+        lines = [line1, line2, line3, line4]
     elif task == 2:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
@@ -467,7 +475,7 @@ if __name__ == '__main__':
     # f_ini = trigonometric(x, 0.1)
 
     # Choosing  the slope limiters for comparison
-    sl = ["minmod", "superbee"]
+    sl = ["minmod", "superbee", "van_leer"]
 
     # Just for the plotting section ...
     f_ini_plt = np.tile(f_ini, [n_steps, 1]).T
@@ -481,10 +489,8 @@ if __name__ == '__main__':
     """
 
     # Do the time integration with the finite differencing
-    start = time.perf_counter()
-    advection_FD = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "FD")
-    duration = time.perf_counter() - start
-    print(f'1D advection finite differencing: {duration}')
+    with Timed(f'1D advection FD'):
+        advection_FD = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "FD")
 
     """
     Task 1: Step 1 -> solving the 1D first order advection equation df/dt = -V0 df/dx 
@@ -492,17 +498,20 @@ if __name__ == '__main__':
     """
 
     # Do the time integration with the finite volume scheme
-    advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
-    # advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
-    #    advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
+    with Timed(f'1D advection MUSCL {sl[0]}'):
+        advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
+    with Timed(f'1D advection MUSCL {sl[1]}'):
+        advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
+    with Timed(f'1D advection MUSCL {sl[2]}'):
+        advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
 
     # Combine the different solutions into one array
     F1 = np.zeros((Nx, n_steps//step, 4))
     F1[:, :, 0] = f_ini_plt[:, ::step]
     F1[:, :, 1] = advection_FD[:, ::step]
     F1[:, :, 2] = advection_MUSCL1[:, ::step]
-    # F1[:, :, 3] = advection_MUSCL2
-    #    F1[:,:,4] = advection_MUSCL3
+    F1[:, :, 3] = advection_MUSCL2[:, ::step]
+    # F1[:, :, 4] = advection_MUSCL3[:, ::step]
 
     """
     Task 2: solving the 1D second order diffusion equation df/dt = D d^2 f / dx^2
