@@ -384,8 +384,6 @@ def animate_results(F, fps, task, *args):
     time_str = "Step: " + str(0) + "/" + str(n_steps)
 
     if task == 1:
-        if False:
-            raise Exception("Wrong task number for the given Array!")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         fig.canvas.manager.set_window_title("AST246: Hydro project - First Task (Advection equation)")
@@ -400,8 +398,6 @@ def animate_results(F, fps, task, *args):
     #            line, = ax.plot([], [], linestyle='-.', label=label_str)
     #            lines.append(line)
     elif task == 2:
-        if False:
-            raise Exception("Wrong task number for the given Array!")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         fig.canvas.manager.set_window_title("AST246: Hydro project - Second Task (Diffusion equation)")
@@ -412,8 +408,6 @@ def animate_results(F, fps, task, *args):
             line, = ax.plot([], [], linestyle='-', label=label_str)
             lines.append(line)
     elif task == 3:
-        if False:
-            raise Exception("Wrong task number for the given Array!")
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
         fig.canvas.manager.set_window_title("AST246: Hydro project - Third Task (Advection-Diffusion equation)")
