@@ -310,16 +310,18 @@ def step_function(x):
     """
 
     f = np.zeros(x.shape)
-    for i in range(x.shape[0]):
-        if x[i] < 0.4:
-            f[i] = 1
-        elif 0.4 < x[i] and x[i] < 0.6:
-            f[i] = 2
+    f[x <= 0.4] = 1
+    f[(x > 0.4) & (x <= 0.6)] = 2
+    # for i in range(x.shape[0]):
+    #     if x[i] < 0.4:
+    #         f[i] = 1
+    #     elif 0.4 < x[i] < 0.6:
+    #         f[i] = 2
 
     return f
 
 
-def gaussian(x):
+def gaussian(x, sigma=0.1):
     """
     Gaussian function for the initial shape
 
@@ -332,7 +334,7 @@ def gaussian(x):
     f : array
     """
 
-    f = 1 + np.exp(-(x - 0.5)**2/(0.1**2))
+    f = 1 + np.exp(-(x - 0.5)**2/(sigma**2))
 
     return f
 
