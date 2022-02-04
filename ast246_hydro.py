@@ -5,6 +5,7 @@ Created on Sun Dec 29 15:36:58 2019
 
 @author: Jens
 """
+import time
 
 """
 This file is used to ...
@@ -501,7 +502,10 @@ if __name__ == '__main__':
     """
 
     # Do the time integration with the finite differencing
+    start = time.perf_counter()
     advection_FD = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "FD")
+    duration = time.perf_counter() - start
+    print(f'1D advection finite differencing: {duration}')
 
     """
     Task 1: Step 1 -> solving the 1D first order advection equation df/dt = -V0 df/dx 
