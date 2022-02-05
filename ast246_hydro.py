@@ -488,7 +488,7 @@ if __name__ == '__main__':
             advection_FD = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "FD")
 
         f_final_numeric = advection_FD[:, -1]
-        error = np.sqrt(np.sum((f_final_numeric - f_final)**2))/len(f_final)
+        error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
         errors.append(error)
 
         plt.plot(x, f_final_numeric, label=f'N={Nx}')
