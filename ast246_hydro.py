@@ -457,7 +457,6 @@ if __name__ == '__main__':
     global V0
     global h
     global f_ini
-
     Nxs = [100, 200, 500, 1000, 2000, 5000]  # number of points / cells. Must be integer multiple of Nx_start.
     Nx_start = 100
     errors = []
@@ -477,10 +476,7 @@ if __name__ == '__main__':
         f = gaussian
         # f = trigonometric(x, 0.1)
         f_ini = f(x)
-        f_final = f(x + n_steps*dt_advec*V0)  # Analytical solution.
-        print(f_final)
-        print(f_ini)
-        break
+        f_final = f((x + n_steps*dt_advec*V0) % 1)  # Analytical solution.
 
         """
         Task 1: Step 0 -> solving the 1D first order advection equation df/dt = -V0 df/dx
