@@ -475,6 +475,7 @@ if __name__ == '__main__':
         dt_advec = 0.5*cfl  # time step for the integration
 
         n_steps = step*500  # number of integration time steps
+        print(n_steps*dt_advec)
 
         # Choosing  the slope limiters for comparison
         sl = ["minmod", "superbee", "van_leer"]
@@ -526,7 +527,7 @@ if __name__ == '__main__':
     plt.plot(Nxs, Nxs[0]/Nxs, label='N_0/N')
     plt.plot(Nxs, np.square(Nxs[0]/Nxs), label='(N_0/N)^2')
     plt.xlabel('Number of cells.')
-    plt.ylabel(r'error.')
+    plt.ylabel(r'normalized error')
     plt.legend()
     plt.show()
 
