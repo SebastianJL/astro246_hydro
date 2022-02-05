@@ -54,7 +54,7 @@ def advection_1D_FD(f, V0, dt, t, h):
     """
     f_next = np.zeros(f.shape)
     f_next[1:] = f[1:] - dt*V0*(f[1:] - f[:-1])/h
-    f_next[0] = f_next[-1]  # Periodic boundary.
+    f_next[0] = f[0] - dt*V0*(f[0] - f[-1])/h  # Periodic boundary.
 
     return f_next
 
