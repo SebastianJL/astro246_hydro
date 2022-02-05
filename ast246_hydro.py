@@ -341,7 +341,7 @@ def gaussian(x, sigma=0.1):
     return f
 
 
-def trigonometric(x, offset):
+def trigonometric(x):
     """
     Trigonometric function for the initial shape
 
@@ -354,7 +354,7 @@ def trigonometric(x, offset):
     ======
     f : array
     """
-
+    offset = 0.1
     f = (1/8)*np.sin(10*np.pi*(x - offset))/((x - offset) + 0.001)
     f[x < offset] = 0
     return f
@@ -461,10 +461,11 @@ if __name__ == '__main__':
     # of Nx_start.
     Nx_start = 100
     errors = np.zeros((3, len(Nxs)))
-    # f = step_function(x)
+    # f = step_function
     f = gaussian
-    # f = trigonometric(x, 0.1)
+    # f = trigonometric
 
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
     for i, Nx in enumerate(Nxs):
         step = Nx//Nx_start  # Step size for plot, such that animations stay the same speed, regardless of Nx.
         xmin, xmax = 0, 1
@@ -474,7 +475,7 @@ if __name__ == '__main__':
         cfl = h/V0  # Courant-Friedrichs-Levy (cfl) timestep condition. Describes the maximum possible timestep.
         dt_advec = 0.5*cfl  # time step for the integration
 
-        n_steps = step*500  # number of integration time steps
+        n_steps = step*600  # number of integration time steps
         print(n_steps*dt_advec)
 
         # Choosing  the slope limiters for comparison
@@ -505,30 +506,49 @@ if __name__ == '__main__':
         f_final_numeric = advection_FD[:, -1]
         error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
         errors[0, i] = error
-        plt.plot(x, f_final_numeric, label=f'N={Nx}')
+        ax1.plot(x, f_final_numeric, label=f'N={Nx}')
 
         f_final_numeric = advection_MUSCL1[:, -1]
         error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
         errors[1, i] = error
+        ax2.plot(x, f_final_numeric, label=f'N={Nx}')
 
         f_final_numeric = advection_MUSCL2[:, -1]
         error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
-        # error = np.mean(np.abs(f_final_numeric - f_final))
         errors[2, i] = error
+        ax3.plot(x, f_final_numeric, label=f'N={Nx}')
 
-    plt.plot(x, f_final, label=f'analytic solution')
+    ax1.plot(x, f_final, label=f'analytic solution')
+    ax2.plot(x, f_final, label=f'analytic solution')
+    ax3.plot(x, f_final, label=f'analytic solution')
+    ax1.set_title('FD')
+    ax2.set_title(f'MUSCL with {sl[0]}')
+    ax3.set_title(f'MUSCL with {sl[1]}')
+    plt.tight_layout()
+    plt.legend(loc='lower right')
+    plt.savefig(f'output/hydro_task1_gauss_final_step_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
+
+    plt.figure()
+    plt.plot(Nxs, errors[0], '.', label='FD')
+    plt.plot(Nxs, errors[1], '.', label=f'MUSCL with {sl[0]}')
+    plt.plot(Nxs, errors[2], '.', label=f'MUSCL with {sl[1]}')
+    plt.xlabel('Number of cells.')
+    plt.ylabel(r'RMS error')
     plt.legend()
+    plt.savefig(f'output/hydro_task1_gauss_absolute_errors_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
 
     plt.figure()
     plt.plot(Nxs, errors[0]/errors[0, 0], '.', label='FD')
     plt.plot(Nxs, errors[1]/errors[1, 0], '.', label=f'MUSCL with {sl[0]}')
     plt.plot(Nxs, errors[2]/errors[2, 0], '.', label=f'MUSCL with {sl[1]}')
-    plt.plot(Nxs, np.sqrt(Nxs[0]/Nxs), label='sqrt(N_0/N)')
-    plt.plot(Nxs, Nxs[0]/Nxs, label='N_0/N')
-    plt.plot(Nxs, np.square(Nxs[0]/Nxs), label='(N_0/N)^2')
+    plt.plot(Nxs, np.sqrt(Nxs[0]/Nxs), label=r'$(N_0/N)^{1/2}$')
+    plt.plot(Nxs, Nxs[0]/Nxs, label='$N_0/N$')
+    plt.plot(Nxs, np.square(Nxs[0]/Nxs), label='$(N_0/N)^2$')
     plt.xlabel('Number of cells.')
     plt.ylabel(r'normalized error')
     plt.legend()
+    plt.savefig(f'output/hydro_task1_gauss_normalized_errors_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
+
     plt.show()
 
 
