@@ -455,7 +455,6 @@ if __name__ == '__main__':
     global x
     global V0
     global h
-    global n_steps
     global f_ini
 
     Nx = 200  # number of points / cells. Must be integer multiple of Nx_start.
@@ -465,15 +464,15 @@ if __name__ == '__main__':
     x, h = np.linspace(xmin, xmax, Nx, retstep=True)
 
     V0 = 1  # advection velocity
-    cfl = h/V0  # cfl timestep condition
-    dt_advec = 0.5*cfl  # time step for the integration
+    cfl = h/V0  # Courant-Friedrichs-Levy (cfl) timestep condition. Describes the maximum possible timestep.
+    dt_advec = 0.5*cfl * 1.2  # time step for the integration
 
     n_steps = step*500  # number of integration time steps
 
     # Defining the initial shape
     # f_ini = step_function(x)
-    f_ini = gaussian(x)
-    # f_ini = trigonometric(x, 0.1)
+    # f_ini = gaussian(x)
+    f_ini = trigonometric(x, 0.1)
 
     # Choosing  the slope limiters for comparison
     sl = ["minmod", "superbee", "van_leer"]
@@ -573,8 +572,9 @@ if __name__ == '__main__':
     """
     task = 1
     outer_ani = animate_results(F1, task, fps, n_steps//step, xmin, xmax)
-    plt.show()
+    # plt.show()
 
-    # Writer = animation.writers['ffmpeg']
-    # writer = Writer(fps=fps, metadata=dict(artist='Me'), bitrate=1000)
-    # outer_ani.save(f'output/hydro_task{task}_step_Nx{Nx}_FD.mp4', writer, dpi=300)
+    Writer = animation.writers['ffmpeg']
+    writer = Writer(fps=fps, metadata=dict(artist='Me'), bitrate=1000)
+    with Timed('saving animation'):
+        outer_ani.save(f'output/hydro_task{task}_trigo_step_Nx{Nx}_FD.mp4', writer, dpi=300)
