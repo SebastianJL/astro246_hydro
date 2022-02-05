@@ -24,6 +24,7 @@ from matplotlib import animation
 
 class Timed(object):
     """Context manager for printing runtime of enclosed code."""
+
     def __init__(self, msg):
         self.msg = msg
         self._start = time.perf_counter()
@@ -457,124 +458,85 @@ if __name__ == '__main__':
     global h
     global f_ini
 
-    Nx = 200  # number of points / cells. Must be integer multiple of Nx_start.
+    Nxs = [100, 200, 500, 1000, 2000, 5000]  # number of points / cells. Must be integer multiple of Nx_start.
     Nx_start = 100
-    step = Nx//Nx_start  # Step size for plot, such that animations stay the same speed, regardless of Nx.
-    xmin, xmax = 0, 1
-    x, h = np.linspace(xmin, xmax, Nx, retstep=True)
+    errors = []
+    for Nx in Nxs:
+        step = Nx//Nx_start  # Step size for plot, such that animations stay the same speed, regardless of Nx.
+        xmin, xmax = 0, 1
+        x, h = np.linspace(xmin, xmax, Nx, retstep=True)
 
-    V0 = 1  # advection velocity
-    cfl = h/V0  # Courant-Friedrichs-Levy (cfl) timestep condition. Describes the maximum possible timestep.
-    dt_advec = 0.5*cfl * 1.2  # time step for the integration
+        V0 = 1  # advection velocity
+        cfl = h/V0  # Courant-Friedrichs-Levy (cfl) timestep condition. Describes the maximum possible timestep.
+        dt_advec = 0.5*cfl  # time step for the integration
 
-    n_steps = step*500  # number of integration time steps
+        n_steps = step*500  # number of integration time steps
 
-    # Defining the initial shape
-    # f_ini = step_function(x)
-    # f_ini = gaussian(x)
-    f_ini = trigonometric(x, 0.1)
+        # Defining the initial shape
+        # f = step_function(x)
+        f = gaussian
+        # f = trigonometric(x, 0.1)
+        f_ini = f(x)
+        f_final = f(x + n_steps*dt_advec*V0)  # Analytical solution.
+        print(f_final)
+        print(f_ini)
+        break
 
-    # Choosing  the slope limiters for comparison
-    sl = ["minmod", "superbee", "van_leer"]
-    # van_leer seems to be broken.
+        """
+        Task 1: Step 0 -> solving the 1D first order advection equation df/dt = -V0 df/dx
+                          using first order finite differencing scheme
+        """
 
-    # Just for the plotting section ...
-    f_ini_plt = np.tile(f_ini, [n_steps, 1]).T
+        # Do the time integration with the finite differencing
+        with Timed(f'1D advection FD'):
+            advection_FD = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "FD")
 
-    # Defining the number of fps for the animation at the end
-    fps = 30
+        f_final_numeric = advection_FD[:, -1]
+        error = np.sqrt(np.sum((f_final_numeric - f_final)**2))/len(f_final)
+        errors.append(error)
 
-    """
-    Task 1: Step 0 -> solving the 1D first order advection equation df/dt = -V0 df/dx
-                      using first order finite differencing scheme
-    """
+        plt.plot(x, f_final_numeric, label=f'N={Nx}')
+    plt.plot(x, f_final, label=f'analytic solution')
+    plt.legend()
 
-    # Do the time integration with the finite differencing
-    with Timed(f'1D advection FD'):
-        advection_FD = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "FD")
+    plt.figure()
+    plt.plot(Nxs, errors, '.')
+    plt.xlabel('Number of cells.')
+    plt.ylabel(r'error.')
+    plt.show()
 
     """
     Task 1: Step 1 -> solving the 1D first order advection equation df/dt = -V0 df/dx 
                       using second order finite volume scheme (MUSCL)
     """
 
+    # Choosing  the slope limiters for comparison
+    # sl = ["minmod", "superbee", "van_leer"]
+    # # van_leer seems to be broken.
+    #
     # Do the time integration with the finite volume scheme
-    with Timed(f'1D advection MUSCL {sl[0]}'):
-        advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
-    with Timed(f'1D advection MUSCL {sl[1]}'):
-        advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
+    # with Timed(f'1D advection MUSCL {sl[0]}'):
+    #     advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
+    # with Timed(f'1D advection MUSCL {sl[1]}'):
+    #     advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
     # with Timed(f'1D advection MUSCL {sl[2]}'):
     #     advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
-
+    #
     # Combine the different solutions into one array
-    F1 = np.zeros((Nx, n_steps//step, 4))
-    F1[:, :, 0] = f_ini_plt[:, ::step]
-    F1[:, :, 1] = advection_FD[:, ::step]
-    F1[:, :, 2] = advection_MUSCL1[:, ::step]
-    F1[:, :, 3] = advection_MUSCL2[:, ::step]
-
-    """
-    Task 2: solving the 1D second order diffusion equation df/dt = D d^2 f / dx^2
-            using the finite difference method
-    """
-
-    # D = np.array([1e-3, 5e-2, 5e-1, 1])
-    # dt_diff = np.zeros(D.shape[0])
-    # dt_diff[:] = 0.5*h**2/(2*np.amax(D))
-    #
-    # F2 = np.zeros((Nx, n_steps, 1 + D.shape[0]))
-    # F2[:, :, 0] = f_ini_plt
-    # for i in range(D.shape[0]):
-    #     F2[:, :, i + 1] = diffusion_1D_integration(n_steps, f_ini, D[i], h, dt_diff[i], "FD")
-
-    """
-    Task 3: solving the 1D second order advection-diffusion equation
-            df/dt = -V0 df/dx + D d^2 f / fx^2
-            using the operator splitting technique
-    """
-
-    # D_advec_diff = [0.01]
-    # dt_advec_diff = [0.5*h**2/(2*D_advec_diff[0])]
-    # #    dt_advec_diff = [dt_advec]
-    #
-    # #    print(n_steps*dt_advec_diff[0], dt_advec_diff[0])
-    # #    print(n_steps*dt_advec_diff2[0], dt_advec_diff2[0])
-    #
-    # F3 = np.zeros((Nx, n_steps, 3))
-    #
-    # F3[:, :, 0] = f_ini_plt
-    #
-    # j = 1
-    # for (d, dt) in zip(D_advec_diff, dt_advec_diff):
-    #     for slope_type in sl:
-    #         F3[:, :, j] = diffusion_1D_integration(n_steps, f_ini, d, h, dt, "OS", slope_type)
-    #         j += 1
-    #
-    # #    F3[:,:,1] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[0], h, dt_advec_diff[0], "OS", sl[0])
-    # #    F3[:,:,2] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[0], h, dt_advec_diff[0], "OS", sl[1])
-    # #    F3[:,:,3] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[1], h, dt_advec_diff[1], "OS", sl[0])
-    # #    F3[:,:,4] = diffusion_1D_integration(n_steps, f_ini, D_advec_diff[1], h, dt_advec_diff[1], "OS", sl[1])
-
-    """
-    Calculate the equivalent diffusion coefficient D for the advection equation
-    
-    """
-
-    #    F4 = np.zeros((Nx, n_steps, 3))
-    #    D_equivalent = np.array([1/2 * V0 * h])
-    #    dt_equivalent = np.array([dt_advec])
-    #    F4[:,:,0] = f_ini_plt
-    #    F4[:,:,1] = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "FD")
-    #    F4[:,:,2] = diffusion_1D_integration(n_steps, f_ini, D_equivalent, h, dt_equivalent, "FD")
+    # F1 = np.zeros((Nx, n_steps//step, 4))
+    # F1[:, :, 0] = f_ini_plt[:, ::step]
+    # F1[:, :, 1] = advection_FD[:, ::step]
+    # F1[:, :, 2] = advection_MUSCL1[:, ::step]
+    # F1[:, :, 3] = advection_MUSCL2[:, ::step]
 
     """
     Plotting the desired results results & saving to a file
     """
-    task = 1
-    outer_ani = animate_results(F1, task, fps, n_steps//step, xmin, xmax)
-    # plt.show()
-
-    Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=fps, metadata=dict(artist='Me'), bitrate=1000)
-    with Timed('saving animation'):
-        outer_ani.save(f'output/hydro_task{task}_trigo_step_Nx{Nx}_FD.mp4', writer, dpi=300)
+    # task = 1
+    # outer_ani = animate_results(F1, task, fps, n_steps//step, xmin, xmax)
+    # # plt.show()
+    #
+    # Writer = animation.writers['ffmpeg']
+    # writer = Writer(fps=fps, metadata=dict(artist='Me'), bitrate=1000)
+    # with Timed('saving animation'):
+    #     outer_ani.save(f'output/hydro_task{task}_trigo_step_Nx{Nx}_FD.mp4', writer, dpi=300)
