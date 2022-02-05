@@ -457,10 +457,15 @@ if __name__ == '__main__':
     global V0
     global h
     global f_ini
-    Nxs = [100, 200, 500, 1000, 2000, 5000]  # number of points / cells. Must be integer multiple of Nx_start.
+    Nxs = np.array([100, 200, 500]) #], 1000]) #, 2000, 5000]  # number of points / cells. Must be integer multiple
+    # of Nx_start.
     Nx_start = 100
-    errors = []
-    for Nx in Nxs:
+    errors = np.zeros((3, len(Nxs)))
+    # f = step_function(x)
+    f = gaussian
+    # f = trigonometric(x, 0.1)
+
+    for i, Nx in enumerate(Nxs):
         step = Nx//Nx_start  # Step size for plot, such that animations stay the same speed, regardless of Nx.
         xmin, xmax = 0, 1
         x, h = np.linspace(xmin, xmax, Nx, retstep=True)
@@ -471,10 +476,11 @@ if __name__ == '__main__':
 
         n_steps = step*500  # number of integration time steps
 
+        # Choosing  the slope limiters for comparison
+        sl = ["minmod", "superbee", "van_leer"]
+        # van_leer seems to be broken.
+
         # Defining the initial shape
-        # f = step_function(x)
-        f = gaussian
-        # f = trigonometric(x, 0.1)
         f_ini = f(x)
         f_final = f((x + n_steps*dt_advec*V0) % 1)  # Analytical solution.
 
@@ -482,33 +488,51 @@ if __name__ == '__main__':
         Task 1: Step 0 -> solving the 1D first order advection equation df/dt = -V0 df/dx
                           using first order finite differencing scheme
         """
-
         # Do the time integration with the finite differencing
-        with Timed(f'1D advection FD'):
+        with Timed(f'1D advection FD, {Nx=}'):
             advection_FD = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "FD")
+
+        """
+        Task 1: Step 1 -> solving the 1D first order advection equation df/dt = -V0 df/dx 
+                          using second order finite volume scheme (MUSCL)
+        """
+        with Timed(f'1D advection MUSCL {sl[0]}, {Nx=}'):
+            advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
+        with Timed(f'1D advection MUSCL {sl[1]}, {Nx=}'):
+            advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
 
         f_final_numeric = advection_FD[:, -1]
         error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
-        errors.append(error)
-
+        errors[0, i] = error
         plt.plot(x, f_final_numeric, label=f'N={Nx}')
+
+        f_final_numeric = advection_MUSCL1[:, -1]
+        error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
+        errors[1, i] = error
+
+        f_final_numeric = advection_MUSCL2[:, -1]
+        error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
+        # error = np.mean(np.abs(f_final_numeric - f_final))
+        errors[2, i] = error
+
     plt.plot(x, f_final, label=f'analytic solution')
     plt.legend()
 
     plt.figure()
-    plt.plot(Nxs, errors, '.')
+    plt.plot(Nxs, errors[0]/errors[0, 0], '.', label='FD')
+    plt.plot(Nxs, errors[1]/errors[1, 0], '.', label=f'MUSCL with {sl[0]}')
+    plt.plot(Nxs, errors[2]/errors[2, 0], '.', label=f'MUSCL with {sl[1]}')
+    plt.plot(Nxs, np.sqrt(Nxs[0]/Nxs), label='sqrt(N_0/N)')
+    plt.plot(Nxs, Nxs[0]/Nxs, label='N_0/N')
+    plt.plot(Nxs, np.square(Nxs[0]/Nxs), label='(N_0/N)^2')
     plt.xlabel('Number of cells.')
     plt.ylabel(r'error.')
+    plt.legend()
     plt.show()
 
-    """
-    Task 1: Step 1 -> solving the 1D first order advection equation df/dt = -V0 df/dx 
-                      using second order finite volume scheme (MUSCL)
-    """
 
-    # Choosing  the slope limiters for comparison
-    # sl = ["minmod", "superbee", "van_leer"]
-    # # van_leer seems to be broken.
+
+
     #
     # Do the time integration with the finite volume scheme
     # with Timed(f'1D advection MUSCL {sl[0]}'):
