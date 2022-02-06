@@ -457,13 +457,14 @@ if __name__ == '__main__':
     global V0
     global h
     global f_ini
-    Nxs = np.array([100, 200, 500]) #], 1000]) #, 2000, 5000]  # number of points / cells. Must be integer multiple
+    Nxs = np.array([100, 200, 500, 1000, 2000, 5000])  # number of points / cells. Must be integer multiple
     # of Nx_start.
     Nx_start = 100
     errors = np.zeros((3, len(Nxs)))
-    # f = step_function
-    f = gaussian
-    # f = trigonometric
+
+    name = 'trig'
+    funcs = {'step': step_function, 'gauss': gaussian, 'trig': trigonometric}
+    f = funcs[name]
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
     for i, Nx in enumerate(Nxs):
@@ -526,7 +527,7 @@ if __name__ == '__main__':
     ax3.set_title(f'MUSCL with {sl[1]}')
     plt.tight_layout()
     plt.legend(loc='lower right')
-    plt.savefig(f'output/hydro_task1_gauss_final_step_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
+    plt.savefig(f'output/hydro_task1_{name}_final_step_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
 
     plt.figure()
     plt.plot(Nxs, errors[0], '.', label='FD')
@@ -535,7 +536,7 @@ if __name__ == '__main__':
     plt.xlabel('Number of cells.')
     plt.ylabel(r'RMS error')
     plt.legend()
-    plt.savefig(f'output/hydro_task1_gauss_absolute_errors_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
+    plt.savefig(f'output/hydro_task1_{name}_absolute_errors_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
 
     plt.figure()
     plt.plot(Nxs, errors[0]/errors[0, 0], '.', label='FD')
@@ -547,7 +548,7 @@ if __name__ == '__main__':
     plt.xlabel('Number of cells.')
     plt.ylabel(r'normalized error')
     plt.legend()
-    plt.savefig(f'output/hydro_task1_gauss_normalized_errors_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
+    plt.savefig(f'output/hydro_task1_{name}_normalized_errors_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
 
     plt.show()
 
