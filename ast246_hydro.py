@@ -457,27 +457,29 @@ if __name__ == '__main__':
     global V0
     global h
     global f_ini
-    Nxs = np.array([100, 200, 500, 1000, 2000, 5000])  # number of points / cells. Must be integer multiple
-    # of Nx_start.
-    Nx_start = 100
-    errors = np.zeros((3, len(Nxs)))
 
-    name = 'trig'
+    name = 'gauss'
     funcs = {'step': step_function, 'gauss': gaussian, 'trig': trigonometric}
     f = funcs[name]
 
+    Nx = 200  # number of points / cells. Must be integer multiple of Nx_start.
+    Nx_start = 100
+    dt_mults = np.array([0.1, 0.5, 1., 1.5, 2])
+    errors = np.zeros((3, len(dt_mults)))
+
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
-    for i, Nx in enumerate(Nxs):
+    for i, mult in enumerate(dt_mults):
         step = Nx//Nx_start  # Step size for plot, such that animations stay the same speed, regardless of Nx.
         xmin, xmax = 0, 1
         x, h = np.linspace(xmin, xmax, Nx, retstep=True)
 
         V0 = 1  # advection velocity
         cfl = h/V0  # Courant-Friedrichs-Levy (cfl) timestep condition. Describes the maximum possible timestep.
-        dt_advec = 0.5*cfl  # time step for the integration
+        dt_advec = mult * 0.5*cfl  # time step for the integration
+        print(f'{cfl = }')
+        print(f'{dt_advec = }')
 
-        n_steps = step*600  # number of integration time steps
-        print(n_steps*dt_advec)
+        n_steps = int(1/mult * step*600)  # number of integration time steps
 
         # Choosing  the slope limiters for comparison
         sl = ["minmod", "superbee", "van_leer"]
@@ -485,6 +487,7 @@ if __name__ == '__main__':
 
         # Defining the initial shape
         f_ini = f(x)
+        print(f'final time: {n_steps*dt_advec}')
         f_final = f((x + n_steps*dt_advec*V0) % 1)  # Analytical solution.
 
         """
@@ -507,17 +510,17 @@ if __name__ == '__main__':
         f_final_numeric = advection_FD[:, -1]
         error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
         errors[0, i] = error
-        ax1.plot(x, f_final_numeric, label=f'N={Nx}')
+        ax1.plot(x, f_final_numeric, label=f'dt={mult} * cfl/2')
 
         f_final_numeric = advection_MUSCL1[:, -1]
         error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
         errors[1, i] = error
-        ax2.plot(x, f_final_numeric, label=f'N={Nx}')
+        ax2.plot(x, f_final_numeric, label=f'dt={mult} * cfl/2')
 
         f_final_numeric = advection_MUSCL2[:, -1]
         error = np.sqrt(np.mean((f_final_numeric - f_final)**2))
         errors[2, i] = error
-        ax3.plot(x, f_final_numeric, label=f'N={Nx}')
+        ax3.plot(x, f_final_numeric, label=f'dt={mult} * cfl/2')
 
     ax1.plot(x, f_final, label=f'analytic solution')
     ax2.plot(x, f_final, label=f'analytic solution')
@@ -527,49 +530,30 @@ if __name__ == '__main__':
     ax3.set_title(f'MUSCL with {sl[1]}')
     plt.tight_layout()
     plt.legend(loc='lower right')
-    plt.savefig(f'output/hydro_task1_{name}_final_step_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
+    plt.savefig(f'output/hydro_task1_{name}_final_step_dt{dt_mults[0]}-{dt_mults[0]}.png', dpi=300)
 
     plt.figure()
-    plt.plot(Nxs, errors[0], '.', label='FD')
-    plt.plot(Nxs, errors[1], '.', label=f'MUSCL with {sl[0]}')
-    plt.plot(Nxs, errors[2], '.', label=f'MUSCL with {sl[1]}')
-    plt.xlabel('Number of cells.')
+    plt.plot(dt_mults, errors[0], '.', label='FD')
+    plt.plot(dt_mults, errors[1], '.', label=f'MUSCL with {sl[0]}')
+    plt.plot(dt_mults, errors[2], '.', label=f'MUSCL with {sl[1]}')
+    plt.xlabel('timestep [cfl/2].')
     plt.ylabel(r'RMS error')
     plt.legend()
-    plt.savefig(f'output/hydro_task1_{name}_absolute_errors_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
+    plt.savefig(f'output/hydro_task1_{name}_absolute_errors_dt{dt_mults[0]}-{dt_mults[-1]}.png', dpi=300)
 
-    plt.figure()
-    plt.plot(Nxs, errors[0]/errors[0, 0], '.', label='FD')
-    plt.plot(Nxs, errors[1]/errors[1, 0], '.', label=f'MUSCL with {sl[0]}')
-    plt.plot(Nxs, errors[2]/errors[2, 0], '.', label=f'MUSCL with {sl[1]}')
-    plt.plot(Nxs, np.sqrt(Nxs[0]/Nxs), label=r'$(N_0/N)^{1/2}$')
-    plt.plot(Nxs, Nxs[0]/Nxs, label='$N_0/N$')
-    plt.plot(Nxs, np.square(Nxs[0]/Nxs), label='$(N_0/N)^2$')
-    plt.xlabel('Number of cells.')
-    plt.ylabel(r'normalized error')
-    plt.legend()
-    plt.savefig(f'output/hydro_task1_{name}_normalized_errors_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
+    # plt.figure()
+    # plt.plot(dt_mults, errors[0]/errors[0, 0], '.', label='FD')
+    # plt.plot(dt_mults, errors[1]/errors[1, 0], '.', label=f'MUSCL with {sl[0]}')
+    # plt.plot(dt_mults, errors[2]/errors[2, 0], '.', label=f'MUSCL with {sl[1]}')
+    # plt.plot(dt_mults, np.sqrt(dt_mults[0]/dt_mults), label=r'$(dt_0/dt)^{1/2}$')
+    # plt.plot(dt_mults, dt_mults[0]/dt_mults, label='$dt_0/dt$')
+    # plt.plot(dt_mults, np.square(dt_mults[0]/dt_mults), label='$(dt_0/dt)^2$')
+    # plt.xlabel('Number of cells.')
+    # plt.ylabel(r'normalized error')
+    # plt.legend()
+    # plt.savefig(f'output/hydro_task1_{name}_normalized_errors_Nx{Nxs[0]}-{Nxs[-1]}.png', dpi=300)
 
     plt.show()
-
-
-
-
-    #
-    # Do the time integration with the finite volume scheme
-    # with Timed(f'1D advection MUSCL {sl[0]}'):
-    #     advection_MUSCL1 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[0])
-    # with Timed(f'1D advection MUSCL {sl[1]}'):
-    #     advection_MUSCL2 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[1])
-    # with Timed(f'1D advection MUSCL {sl[2]}'):
-    #     advection_MUSCL3 = advection_1D_integration(n_steps, f_ini, V0, h, dt_advec, "MUSCL", sl[2])
-    #
-    # Combine the different solutions into one array
-    # F1 = np.zeros((Nx, n_steps//step, 4))
-    # F1[:, :, 0] = f_ini_plt[:, ::step]
-    # F1[:, :, 1] = advection_FD[:, ::step]
-    # F1[:, :, 2] = advection_MUSCL1[:, ::step]
-    # F1[:, :, 3] = advection_MUSCL2[:, ::step]
 
     """
     Plotting the desired results results & saving to a file
